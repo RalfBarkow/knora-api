@@ -11,7 +11,7 @@
       
       
       <link rel="shortcut icon" href="../../../../assets/images/dasch-favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.7">
     
     
       
@@ -19,9 +19,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.b5d04df8.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.b8ac9624.min.css">
       
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.9ab2c1f8.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.28f3ef9a.min.css">
       
       
         
@@ -2660,12 +2660,23 @@ There are two type inspectors in the pipeline:</p>
   as from ontology information that it requests from <code>OntologyResponderV2</code>.</li>
 </ul>
 <p>Each type inspector takes as input, and returns as output, an <code>IntermediateTypeInspectionResult</code>, which
-associates each <code>TypeableEntity</code> with zero or more types. Initially, each <code>TypeableEntity</code> has no types. Each type inspector
-adds whatever types it finds for each entity. At the end of the pipeline, each entity should
-have exactly one type. If not, that's an error, with two possible causes:</p>
+associates each <code>TypeableEntity</code> with zero or more types. Initially, each <code>TypeableEntity</code> has no types. 
+Each type inspector adds whatever types it finds for each entity. </p>
+<p>At the end of the pipeline, each entity should
+have exactly one type. Therefore, to only keep the most specific type for an entity, 
+the method <code>refineDeterminedTypes</code> refines the determined types by removing those that are base classes of others. However,
+it can be that inconsistent types are determined for entities. For example, in cases where multiple resource class types 
+are determined, but one is not a base class of the others. From the following statement </p>
+<pre><code>{ ?document a beol:manuscript . } UNION { ?document a beol:letter .}
+</code></pre>
+
+<p>two inconsistent types can be inferred for <code>?document</code>: <code>beol:letter</code> and <code>beol:manuscript</code>.
+In these cases, a sanitizer <code>sanitizeInconsistentResourceTypes</code> replaces the inconsistent resource types by 
+their common base resource class (in the above example, it would be <code>beol:writtenSource</code>). </p>
+<p>Lastly, an error is returned if</p>
 <ul>
 <li>An entity's type could not be determined. The client must add a type annotation to make the query work.</li>
-<li>An entity appears to have more than one type, because the query used the entity inconsistently.</li>
+<li>Inconsistent types could not be sanitized (an entity appears to have more than one type). The client must correct the query.</li>
 </ul>
 <p>If there are no errors, <code>GravsearchTypeInspectionRunner</code> converts the pipeline's output to a
 <code>GravsearchTypeInspectionResult</code>, in which each entity is associated with exactly one type.</p>
@@ -2682,7 +2693,9 @@ about those classes and properties, as well as about the classes that are subjec
 <p>Next, the inspector runs inference rules (which extend <code>InferenceRule</code>) on each <code>TypeableEntity</code>. Each rule
 takes as input a <code>TypeableEntity</code>, the usage index, the ontology information, and the <code>IntermediateTypeInspectionResult</code>,
 and returns a new <code>IntermediateTypeInspectionResult</code>. For example, <code>TypeOfObjectFromPropertyRule</code> infers an entity's type
-if the entity is used as the object of a statement and the predicate's <code>knora-api:objectType</code> is known.</p>
+if the entity is used as the object of a statement and the predicate's <code>knora-api:objectType</code> is known. For each <code>TypeableEntity</code>, 
+if a type is inferred from a property, the entity and the inferred type are added to 
+<code>IntermediateTypeInspectionResult.entitiesInferredFromProperty</code>.</p>
 <p>The inference rules are run repeatedly, because the output of one rule may allow another rule to infer additional
 information. There are two pipelines of rules: a pipeline for the first iteration of type inference, and a
 pipeline for subsequent iterations. This is because some rules can return additional information if they are run
@@ -2699,7 +2712,12 @@ and do some basic sanity checks.</p>
 <p>The Gravsearch query is passed to <code>QueryTraverser</code> along with a query transformer. Query transformers are classes
 that implement traits supported by <code>QueryTraverser</code>:</p>
 <ul>
-<li><code>WhereTransformer</code>: instructions how to convert statements in the Where clause of a SPARQL query (to generate the prequery's Where clause).</li>
+<li><code>WhereTransformer</code>: instructions how to convert statements in the WHERE clause of a SPARQL query (to generate the prequery's Where clause).</li>
+</ul>
+<p>To improve query performance, this trait defines the method <code>optimiseQueryPatterns</code> whose implementation can call 
+private methods to optimise the generated SPARQL. For example, before transformation of statements in WHERE clause, query 
+pattern orders must be optimised by moving <code>LuceneQueryPatterns</code> to the beginning and <code>isDeleted</code> statement patterns to the end of the WHERE clause. </p>
+<ul>
 <li><code>ConstructToSelectTransformer</code> (extends <code>WhereTransformer</code>): instructions how to turn a Construct query into a Select query (converts a Gravsearch query into a prequery)</li>
 <li><code>SelectToSelectTransformer</code> (extends <code>WhereTransformer</code>): instructions how to turn a triplestore independent Select query into a triplestore dependent Select query (implementation of inference).    </li>
 <li><code>ConstructToConstructTransformer</code> (extends <code>WhereTransformer</code>): instructions how to turn a triplestore independent Construct query into a triplestore dependent Construct query (implementation of inference).</li>
@@ -2713,7 +2731,12 @@ This is necessary to support paging.
 A prequery is a SPARQL SELECT query.</p>
 <p>The classes involved in generating prequeries can be found in <code>org.knora.webapi.messages.util.search.gravsearch.prequery</code>.</p>
 <p>If the client submits a count query, the prequery returns the overall number of hits, but not the results themselves.</p>
-<p>In a first step, the Gravsearch query's WHERE clause is transformed and the prequery (SELECT and WHERE clause) is generated from this result.
+<p>In a first step, before transforming the WHERE clause, query patterns must be further optimised by removing
+the <code>rdfs:type</code> statement for entities whose type could be inferred from a property since there would be no need 
+for explicit <code>rdfs:type</code> statements for them (unless the property from which the type of an entity must be inferred from 
+is wrapped in an <code>OPTIONAL</code> block). This optimisation has to happen in advance, because 
+otherwise <code>transformStatementInWhere</code> would expand the redundant <code>rdfs:type</code> statements.</p>
+<p>Next, the Gravsearch query's WHERE clause is transformed and the prequery (SELECT and WHERE clause) is generated from this result.
 The transformation of the Gravsearch query's WHERE clause relies on the implementation of the abstract class <code>AbstractPrequeryGenerator</code>.</p>
 <p><code>AbstractPrequeryGenerator</code> contains members whose state is changed during the iteration over the statements of the input query.
 They can then by used to create the converted query.</p>
@@ -2842,7 +2865,9 @@ inference are marked with the virtual named graph <code>&lt;http://www.knora.org
 <li>
 <p>If the triplestore is GraphDB, <code>SparqlTransformer.transformKnoraExplicitToGraphDBExplicit</code> changes statements
   with the virtual graph <code>&lt;http://www.knora.org/explicit&gt;</code> so that they are marked with the GraphDB-specific graph
-  <code>&lt;http://www.ontotext.com/explicit&gt;</code>, and leaves other statements unchanged.</p>
+  <code>&lt;http://www.ontotext.com/explicit&gt;</code>, and leaves other statements unchanged. 
+  <code>SparqlTransformer.transformKnoraExplicitToGraphDBExplicit</code> also adds the <code>valueHasString</code> statements which GraphDB needs 
+  for text searches.</p>
 </li>
 <li>
 <p>If Knora is not using the triplestore's inference (e.g. with Fuseki),
@@ -2923,15 +2948,15 @@ with <code>knora-base:standoffTagHasStartParent*</code>.</p>
       
     </div>
     
-      <script src="../../../../assets/javascripts/vendor.92ffa368.min.js"></script>
-      <script src="../../../../assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../../assets/javascripts/vendor.d1f5a259.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.d5fec882.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../../..",
           features: ["tabs"],
           search: Object.assign({
-            worker: "../../../../assets/javascripts/worker/search.a68abb33.min.js"
+            worker: "../../../../assets/javascripts/worker/search.fae956e7.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

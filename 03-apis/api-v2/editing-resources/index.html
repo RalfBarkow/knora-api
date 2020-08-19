@@ -11,7 +11,7 @@
       
       
       <link rel="shortcut icon" href="../../../assets/images/dasch-favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.7">
     
     
       
@@ -19,9 +19,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.b5d04df8.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.b8ac9624.min.css">
       
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.9ab2c1f8.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.28f3ef9a.min.css">
       
       
         
@@ -924,6 +924,19 @@
   <a href="#deleting-a-resource" class="md-nav__link">
     Deleting a Resource
   </a>
+  
+    <nav class="md-nav" aria-label="Deleting a Resource">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#links-to-deleted-resources" class="md-nav__link">
+    Links to Deleted Resources
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2418,6 +2431,19 @@
     Deleting a Resource
   </a>
   
+    <nav class="md-nav" aria-label="Deleting a Resource">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#links-to-deleted-resources" class="md-nav__link">
+    Links to Deleted Resources
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2619,7 +2645,7 @@ have permission to create resources of that class in that project.</p>
 the <code>@id</code> attribute which will then be assigned to the resource; otherwise the resource will get a unique random IRI. 
 Similarly, it is possible to assign a custom IRI to the values using their <code>@id</code> attributes; if not given, random IRIs
 will be assigned to the values. An optional custom UUID of a value can also be given by adding <code>knora-api:valueHasUUID</code>.
-Each custom UUID must be <a href="rfc:4648#section-5">base64url-encoded</a>, without padding. Each value of the new resource
+Each custom UUID must be <a href="https://tools.ietf.org/html/rfc4648#section-5">base64url-encoded</a>, without padding. Each value of the new resource
 can also have a custom creation date specified by adding <code>knora-api:creationDate</code> 
 (an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>).
 For example:</p>
@@ -2655,7 +2681,7 @@ For example:</p>
 </code></pre>
 
 <p>The response is a JSON-LD document containing a
-<a href="../reading-and-searching-resources/#get-the-preview-of-a-resource-by-its-iri">preview</a>
+<a href="../reading-and-searching-resources/#get-the-preview-of-a-resource-by-iri">preview</a>
 of the resource.</p>
 <h2 id="modifying-a-resources-values">Modifying a Resource's Values</h2>
 <p>See <a href="../editing-values/">Editing Values</a>.</p>
@@ -2744,8 +2770,24 @@ that they do not appear in normal query results.</p>
 
 <p>The optional property <code>knora-api:deleteComment</code> specifies a comment to be attached to the
 resource, explaining why it has been marked as deleted.</p>
+<p>The optional property <code>knora-api:deleteDate</code>
+(an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>)
+indicates when the resource was marked as deleted; if not given, the current
+time is used.</p>
 <p>The response is a JSON-LD document containing the predicate <code>knora-api:result</code>
 with a confirmation message.</p>
+<h3 id="links-to-deleted-resources">Links to Deleted Resources</h3>
+<p>If resource <code>A</code> has a link to resource <code>B</code>, and resource
+<code>B</code> is later marked as deleted, <code>A</code>'s link will still exist. Knora API
+v2 will still return the link when <code>A</code> is queried, but without any information
+about <code>B</code> (except for <code>B</code>'s IRI). If <code>A</code>'s link is necessary to
+meet the requirements of a cardinality, marking <code>B</code> as deleted will
+not violate the cardinality.</p>
+<p>The reason for this design is that <code>A</code> and <code>B</code> might be in
+different projects, and each project must retain control of its resources
+and be able to mark them as deleted, even if they are used by another
+project. In future, Knora may be able to notify the owner of <code>A</code> in this
+case.</p>
 <h2 id="erasing-a-resource-from-the-triplestore">Erasing a Resource from the Triplestore</h2>
 <p>Normally, resources are not actually removed from the triplestore; they are
 only marked as deleted (see <a href="#deleting-a-resource">Deleting a Resource</a>).
@@ -2833,15 +2875,15 @@ backup), so use it with care.</p>
       
     </div>
     
-      <script src="../../../assets/javascripts/vendor.92ffa368.min.js"></script>
-      <script src="../../../assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../assets/javascripts/vendor.d1f5a259.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d5fec882.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../..",
           features: ["tabs"],
           search: Object.assign({
-            worker: "../../../assets/javascripts/worker/search.a68abb33.min.js"
+            worker: "../../../assets/javascripts/worker/search.fae956e7.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

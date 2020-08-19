@@ -11,7 +11,7 @@
       
       
       <link rel="shortcut icon" href="../../../assets/images/dasch-favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.7">
     
     
       
@@ -19,9 +19,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.b5d04df8.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.b8ac9624.min.css">
       
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.9ab2c1f8.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.28f3ef9a.min.css">
       
       
         
@@ -1831,15 +1831,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-intellij-ideas-debugger-with-knora" class="md-nav__link">
-    Use IntelliJ IDEA's Debugger with Knora
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-a-remote-debugger-with-intellij" class="md-nav__link">
-    Use a Remote Debugger with Intellij
+  <a href="#use-intellij-ideas-rundebugger-configuration-with-knora" class="md-nav__link">
+    Use IntelliJ IDEA's Run/Debugger Configuration with Knora
   </a>
   
 </li>
@@ -2393,15 +2386,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-intellij-ideas-debugger-with-knora" class="md-nav__link">
-    Use IntelliJ IDEA's Debugger with Knora
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-a-remote-debugger-with-intellij" class="md-nav__link">
-    Use a Remote Debugger with Intellij
+  <a href="#use-intellij-ideas-rundebugger-configuration-with-knora" class="md-nav__link">
+    Use IntelliJ IDEA's Run/Debugger Configuration with Knora
   </a>
   
 </li>
@@ -2451,54 +2437,79 @@ License along with Knora.  If not, see <http://www.gnu.org/licenses/>.
 <h1 id="setup-intellij-for-development-of-knora">Setup IntelliJ for development of Knora</h1>
 <h2 id="create-an-intellij-project-for-knora">Create an IntelliJ Project for Knora</h2>
 <ul>
-<li>Download and install <a href="https://www.jetbrains.com/idea/">IntelliJ IDEA</a>.</li>
+<li>Download and install a version of <a href="https://www.jetbrains.com/idea/">IntelliJ IDEA</a> that <a href="https://plugins.jetbrains.com/plugin/8609-bazel/versions">supports Bazel</a>, eg. version <code>2019.03.05</code>.</li>
 <li>Follow the installation procedure and install the <code>Scala plugin</code></li>
 </ul>
 <p><img alt="screenshot 'Install Scala Plugin'" src="../figures/install-scala-plugin.png" /></p>
 <ul>
-<li>Add Bazel Plugin and Project to IntelliJ</li>
-<li>The latest version of the <a href="https://plugins.jetbrains.com/plugin/8609-bazel/versions">Bazel plugin</a>
-    supports only IntelliJ upto version <code>2019.03.05</code>. After you make sure to
-    run this version of IntelliJ, install the plugin from inside IntelliJ.</li>
-<li>Click on <code>File -&gt; Import Bazel Project</code> and select twice <code>next</code>.</li>
-<li>
-<p>Uncomment the <code>Scala</code> language and click <code>Finish</code>.</p>
-</li>
-<li>
-<p>make sure that the tab size is set correctly to <strong>4 spaces</strong> (so you
+<li>Add Bazel Plugin: run InteliJ and install the plugin from inside IntelliJ.</li>
+<li>Create a project for Knora: restart InteliJ and create a project for Knora using <code>Import Bazel Project</code> option.</li>
+</ul>
+<p><img alt="screenshot 'Import Project'" src="../figures/import-bazel-project.png" /></p>
+<ul>
+<li>Make sure that the Bazel <code>Workspace</code> points to the path of Knora and click <code>next</code>.</li>
+</ul>
+<p><img alt="screenshot 'Workspace'" src="../figures/bazel-workspace.png" /></p>
+<ul>
+<li>Select the <code>Generate from BUILD file</code> option and give the path to the main <code>BUILD.bazel</code> file of Knora, click <code>next</code>.</li>
+</ul>
+<p><img alt="screenshot 'Bazel build'" src="../figures/bazel-buildFile.png" /></p>
+<ul>
+<li>Uncomment the <code>Scala</code> language and click <code>Finish</code>.</li>
+</ul>
+<p><img alt="screenshot 'Bazel Scala'" src="../figures/bazel-UncommentScala.png" /></p>
+<p>At this point a <code>.ijwb</code> file is created for Knora project and added to the welcome screen of InteiJ. You can open the project by clicking on it.</p>
+<ul>
+<li>Once the project is built and opened in InteliJ, make sure that project in synced with Bazel build files by clicking
+   on Bazel logo <code>Sync Project with Build Files</code>. This needs to be repeated every time there is a change in a <code>BUILD.bazel</code> file.</li>
+</ul>
+<p><img alt="screenshot 'Bazel sync'" src="../figures/bazel-sync.png" /></p>
+<ul>
+<li>Make sure that the tab size is set correctly to <strong>4 spaces</strong> (so you
     can use automatic code reformatting): <code>Preferences -&gt; Code Style -&gt;
-    Scala</code>:</p>
-</li>
+    Scala</code>:</li>
 </ul>
 <p><img alt="screenshot 'setting tab size'" src="../figures/setting-tab-space.png" /></p>
-<h2 id="use-intellij-ideas-debugger-with-knora">Use IntelliJ IDEA's Debugger with Knora</h2>
+<h2 id="use-intellij-ideas-rundebugger-configuration-with-knora">Use IntelliJ IDEA's Run/Debugger Configuration with Knora</h2>
+<p>First, you need to create an application configuration to run or debug a code. Here the configuration is explained using a test as an 
+  example, but similarly the application configuration of InteliJ can be used for building the webapi.</p>
+<p>To run a specific test in a command line using Bazel, you would need to give the path of the test relative to its 
+  package as defined in the <code>BUILD.bazel</code> of the package. For example, to run the test  <code>GravsearchTypeInspectorSpec</code> in the
+   command line, you would need to enter <code>bazel test //webapi/src/test/scala/org/knora/webapi/messages/util/search:GravsearchTypeInspectorSpec</code>.
+  Now to run or debug the same test and its underlying code in InteliJ, a new configuration should be
+  set up:</p>
 <ul>
-<li>Create an application configuration:</li>
+<li>Click on the 'Add Configuration' to create a new application configuration. </li>
 </ul>
-<p><img alt="screenshot 'edit application config'" src="../figures/edit-config.png" /></p>
-<p><img alt="screenshot 'create application configuration'" src="../figures/create-app.png" /></p>
-<p>Fill in the configuration details:</p>
-<p><img alt="screenshot 'change application configuration'" src="../figures/app-config-setup.png" /></p>
+<p><img alt="screenshot 'new_configuration'" src="../figures/bazel-new-config.png" /></p>
 <ul>
-<li>Click on the debugging symbol to start the application with a debugger attached:</li>
+<li>Click on the <code>+</code> and choose <code>Bazel Command</code> </li>
 </ul>
-<p><img alt="screenshot 'debug'" src="../figures/debug.png" /></p>
+<p><img alt="screenshot 'new_configuration'" src="../figures/bazel-command-config.png" /></p>
 <ul>
-<li>Click on a line-number to add a breakpoint</li>
+<li>Give the type of the command, i.e. <code>test</code> and the path parameter, as shown below. Then press <code>Apply</code>, and finish 
+   the configuration by pressing <code>OK</code>.</li>
 </ul>
-<p><img alt="screenshot 'set a breakpoint'" src="../figures/breakpoint.png" /></p>
-<h2 id="use-a-remote-debugger-with-intellij">Use a Remote Debugger with Intellij</h2>
+<p><img alt="screenshot 'configuration_setup'" src="../figures/bazel-config-setup.png" /></p>
+<p>After the configuration is completed, it will appear in a drop-down menu that shows all available configurations. </p>
 <ul>
-<li>edit configurations (Run -&gt; Edit Configurations...)</li>
-<li>add a new remote configuration:</li>
+<li>To run a configured command, eg. to run the test <code>GravsearchTypeInspectorSpec</code>, <ol>
+<li>choose its configuration from the drop-down menu</li>
+<li>click on the <code>Run</code> symbol, the results will appear in the a <code>Run</code> window. Note that, before running the test, the 
+docker container of api should be stopped. </li>
+</ol>
+</li>
 </ul>
-<p><img alt="screenshot 'remote configuration'" src="../figures/remote-config.png" /></p>
+<p><img alt="screenshot 'configuration_run'" src="../figures/bazel-run-config.png" /></p>
 <ul>
-<li>from the console (in folder <code>webapi</code>), run <code>sbt -J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</code></li>
-<li>start Knora using <code>reStart</code></li>
-<li>use debugger: choose configuration and click on <code>Debug [configName]</code></li>
+<li>To debug the code for example by executing a test: <ol>
+<li>Click on a line-number to add a breakpoint. </li>
+<li>Choose the respective configuration from the drop-down menu. </li>
+<li>Click on the debugging symbol to start the application with a debugger attached, as shown below:</li>
+</ol>
+</li>
 </ul>
-<p><img alt="screenshot 'use debugger'" src="../figures/use-debugger.png" /></p>
+<p><img alt="screenshot 'debug'" src="../figures/bazel-debug.png" /></p>
 <h2 id="profile-knora-using-visualvm-in-intellij">Profile Knora Using VisualVM in IntelliJ</h2>
 <p>First, download and install <a href="https://visualvm.github.io/">VisualVM</a>.</p>
 <p>Then, in IntelliJ, under Preferences -> Plugins, search for the
@@ -2593,15 +2604,15 @@ method calls, to see the total time spent in each method:</p>
       
     </div>
     
-      <script src="../../../assets/javascripts/vendor.92ffa368.min.js"></script>
-      <script src="../../../assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../assets/javascripts/vendor.d1f5a259.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d5fec882.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../..",
           features: ["tabs"],
           search: Object.assign({
-            worker: "../../../assets/javascripts/worker/search.a68abb33.min.js"
+            worker: "../../../assets/javascripts/worker/search.fae956e7.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

@@ -11,7 +11,7 @@
       
       
       <link rel="shortcut icon" href="../../../assets/images/dasch-favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.7">
     
     
       
@@ -19,9 +19,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.b5d04df8.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.b8ac9624.min.css">
       
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.9ab2c1f8.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.28f3ef9a.min.css">
       
       
         
@@ -2600,7 +2600,7 @@ are not given. For example, to create an integer value:</p>
 </code></pre>
 
 <p>Each value can have an optional custom IRI (of <a href="../knora-iris/#iris-for-data">Knora IRI</a> form) specified by the <code>@id</code> attribute, a custom creation date specified by adding 
-<code>knora-api:creationDate</code> (an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>), or a custom UUID 
+<code>knora-api:valueCreationDate</code> (an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>), or a custom UUID 
 given by <code>knora-api:valueHasUUID</code>. Each custom UUID must be <a href="rfc:4648#section-5">base64url-encoded</a>, without padding.
 For example: </p>
 <pre><code class="jsonld">  &quot;@id&quot; : &quot;http://rdfh.ch/0001/a-thing&quot;,
@@ -2610,7 +2610,7 @@ For example: </p>
     &quot;@type&quot; : &quot;knora-api:IntValue&quot;,
     &quot;knora-api:intValueAsInt&quot; : 21,
     &quot;knora-api:valueHasUUID&quot; : &quot;IN4R19yYR0ygi3K2VEHpUQ&quot;,
-    &quot;knora-api:creationDate&quot; : {
+    &quot;knora-api:valueCreationDate&quot; : {
         &quot;@type&quot; : &quot;xsd:dateTimeStamp&quot;,
         &quot;@value&quot; : &quot;2020-06-04T12:58:54.502951Z&quot;
       }
@@ -2857,6 +2857,8 @@ on a value, the user must have <strong>change rights permission</strong> on the 
 
 <p>To update a link, the user must have <strong>modify permission</strong> on the containing resource as
 well as on the value.</p>
+<p>To update a value and give it a custom timestamp, add
+<code>knora-api:valueCreationDate</code> (an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>).</p>
 <p>The response is a JSON-LD document containing only <code>@id</code> and <code>@type</code>, returning the IRI
 and type of the new value version.</p>
 <p>If you submit an outdated value ID in a request to update a value, the response will be
@@ -2894,7 +2896,9 @@ the resource to the value, and the value's ID and type. For example:</p>
 </code></pre>
 
 <p>The optional property <code>knora-api:deleteComment</code> specifies a comment to be attached to the
-value, explaining why it has been marked as deleted.</p>
+value, explaining why it has been marked as deleted</p>
+<p>The optional property <code>knora-api:deleteDate</code> (an <a href="https://www.w3.org/TR/xmlschema11-2/#dateTimeStamp">xsd:dateTimeStamp</a>)
+specifies a custom timestamp indicating when the value was deleted. If not specified, the current time is used.</p>
 <p>The response is a JSON-LD document containing the predicate <code>knora-api:result</code>
 with a confirmation message.</p>
                 
@@ -2963,15 +2967,15 @@ with a confirmation message.</p>
       
     </div>
     
-      <script src="../../../assets/javascripts/vendor.92ffa368.min.js"></script>
-      <script src="../../../assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../assets/javascripts/vendor.d1f5a259.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d5fec882.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../..",
           features: ["tabs"],
           search: Object.assign({
-            worker: "../../../assets/javascripts/worker/search.a68abb33.min.js"
+            worker: "../../../assets/javascripts/worker/search.fae956e7.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
