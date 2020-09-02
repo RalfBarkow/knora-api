@@ -54,7 +54,7 @@ permissions on the given file. The cookie contains the current user's
 Knora session id, so Knora can match Sipi's request with a given user
 profile and determine the permissions this user has on the file. If the
 Knora response grants sufficient permissions, the file is served in the
-requested quality. If the suer has preview rights, Sipi serves a reduced
+requested quality. If the user has preview rights, Sipi serves a reduced
 quality or integrates a watermark. If the user has no permissions, Sipi
 refuses to serve the file. However, all of this behaviour is defined in
 the preflight function in Sipi and not controlled by Knora. Knora only
